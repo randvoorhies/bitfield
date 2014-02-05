@@ -5,7 +5,7 @@ int main()
 {
   bitfield<16> b = 0;
 
-  b = 0xffff;
+  b.range<0,7>() = 255;
 
   std::cout << "initial bitfield: " << b.to_string() << std::endl;
 
@@ -20,10 +20,11 @@ int main()
 
   std::cout << "ranges can be converted to strings or integers: " << b.range<0,3>().to_string() << " = " << (int)b.range<0,3>().to_num() << std::endl;
 
-  // b.range<0,8>();          <- Compile time error! Be sure not to overstep your bitfields! Range values are _inclusive_.
-  // b.range<0,1>() = "010";  <- Compile time error! This range can only be assigned two bits.
-  // b.range<0,1>() = "12";   <- Runtime error! Only 0's and 1's are allowed in string assignments
-  // b.range<0,3>() = 0x10;   <- Runtime error! 4 bits can only hold up to 0x0f.
+  // b.range<0,8>();          // <- Compile time error! Be sure not to overstep your bitfields! Range values are _inclusive_.
+  // b.range<0,1>() = "010";  // <- Compile time error! This range can only be assigned two bits.
+  // b.range<0,7>() = 256;    // <- Compile time error! The compiler can recognize that this would be a truncation error.
+  // b.range<0,1>() = "12";   // <- Runtime error! Only 0's and 1's are allowed in string assignments
+  // b.range<0,3>() = 0x10;   // <- Runtime error! 4 bits can only hold up to 0x0f.
 
   return 0;
 } 
