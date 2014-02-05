@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <algorithm>
+#include <iostream>
 
 template<size_t n_bits>
 class bitfield
@@ -19,6 +20,8 @@ class bitfield
     template<size_t size> struct uintx_t<size, typename std::enable_if<(size > 16 && size <= 32)>::type>  { typedef uint32_t type; };
     template<size_t size> struct uintx_t<size, typename std::enable_if<(size > 32 && size <= 64)>::type>  { typedef uint64_t type; };
     static_assert(n_bits <= 64, "bitfield must be created with <= 64 bits");
+
+  public:
 
     //! A range class holds a reference to the parent bitfield, and can be used to set a range of its bits
     template<size_t b, size_t e>
@@ -63,8 +66,8 @@ class bitfield
         std::string to_string()
         {
           std::string s(n_range_bits, '-');
-          for(size_t i=b; i<=e; ++i)
-            s[i] = parent_[e-i] ? '1' : '0';
+          for(size_t i=0; i<n_range_bits; ++i)
+            s[n_range_bits-i-1] = (*this)[i] ? '1' : '0';
           return s;
         }
 
@@ -72,19 +75,41 @@ class bitfield
         typename uintx_t<n_range_bits>::type to_num()
         {
           native_type n(0);
-          for(size_t i=b; i<=e; ++i)
-            if(parent_[i]) n += (0x01 << i);
+          for(size_t i=0; i<n_range_bits; ++i)
+            if((*this)[i]) n += (0x01 << i);
 
           return n;
         }
 
+        bool & operator[](size_t i)
+        {
+          if(reversed_)
+            return parent_.b_[e-i];
+          else
+            return parent_.b_[b+i];
+        }
+
+        //! Reverse the bitfield in place
+        void reverse()
+        {
+          reversed_ = !reversed_;
+        }
+
+        //! Reverse the bitfield in place
+        Range<b,e> reversed()
+        {
+          Range<b,e> other = *this;
+          other.reversed_ = !reversed_;
+          return other;
+        }
+
         bitfield<n_bits> & parent_;
+        bool reversed_ = false;
       };
+
 
     //! The native storage type
     typedef std::array<bool, n_bits> storage_t;
-
-  public:
 
     //! The integral type that this bitfield can store.
     typedef typename uintx_t<n_bits>::type native_type;
@@ -103,6 +128,19 @@ class bitfield
 
     //! Copy constructor
     bitfield(bitfield<n_bits> const & other) : b_(other.b_) { }
+
+    ////! Construct from range
+    //template<size_t o, size_t b, size_t e>
+    //bitfield(typename bitfield<o>::template Range<b,e> other)
+    //{
+    //  std::cout << "construct from range" << std::endl;
+    //}
+    
+    template<size_t o, size_t b, size_t e>
+    void doit(typename bitfield<o>::template Range<b,e> other)
+    {
+      std::cout << other.reversed_ << std::endl;
+    }
 
     //! Access a range of the bitfield
     template<size_t b, size_t e>
@@ -127,7 +165,6 @@ class bitfield
       range<0,n_bits-1>() = v;
     }
 
-
     //! Convert the bitfield to a string for printing
     std::string to_string()
     {
@@ -143,16 +180,18 @@ class bitfield
     //! Access a single bit of the bitfield
     bool & operator[](size_t i)
     {
-      return b_[i];
+      return this->range<0,n_bits-1>()[i];
     }
 
     //! Reverse the bitfield in place
+    /*! \todo This needs to just self-assign the range reversed */
     void reverse()
     {
       std::reverse(b_.begin(), b_.end());
     }
 
     //! Reverse a copy of the bitfield and return it
+    /*! \todo This needs to just return the range reversed */
     bitfield<n_bits> reversed()
     {
       bitfield<n_bits> other(*this);
