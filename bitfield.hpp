@@ -13,11 +13,11 @@ class bitfield
 
     //! A helper class to determine which integer type can hold all of our bits
     /*! Note that this limits us to 64 bit bitfields! */
-    template<size_t size, class enable=void> struct uint_x_t { typedef void type; };
-    template<size_t size> struct uint_x_t<size, typename std::enable_if<(size <= 8)>::type >               { typedef uint8_t  type; };
-    template<size_t size> struct uint_x_t<size, typename std::enable_if<(size > 8 && size <= 16)>::type>   { typedef uint16_t type; };
-    template<size_t size> struct uint_x_t<size, typename std::enable_if<(size > 16 && size <= 32)>::type>  { typedef uint32_t type; };
-    template<size_t size> struct uint_x_t<size, typename std::enable_if<(size > 32 && size <= 64)>::type>  { typedef uint64_t type; };
+    template<size_t size, class enable=void> struct uintx_t { typedef void type; };
+    template<size_t size> struct uintx_t<size, typename std::enable_if<(size <= 8)>::type >               { typedef uint8_t  type; };
+    template<size_t size> struct uintx_t<size, typename std::enable_if<(size > 8 && size <= 16)>::type>   { typedef uint16_t type; };
+    template<size_t size> struct uintx_t<size, typename std::enable_if<(size > 16 && size <= 32)>::type>  { typedef uint32_t type; };
+    template<size_t size> struct uintx_t<size, typename std::enable_if<(size > 32 && size <= 64)>::type>  { typedef uint64_t type; };
     static_assert(bits <= 64, "bitfield must be created with <= 64 bits");
 
     typedef std::array<bool, bits> storage_t;
@@ -68,7 +68,7 @@ class bitfield
       }
 
       //! Convert the bitfield to a number
-      typename uint_x_t<e-b+1>::type to_num()
+      typename uintx_t<e-b+1>::type to_num()
       {
         native_type n(0);
         for(size_t i=b; i<=e; ++i)
@@ -83,7 +83,7 @@ class bitfield
   public:
 
     //! The integral type that this bitfield can be converted to. See to_num() for details
-    typedef typename uint_x_t<bits>::type native_type;
+    typedef typename uintx_t<bits>::type native_type;
 
     //! Default constructor - set to all zeros
     bitfield()
@@ -105,6 +105,21 @@ class bitfield
         return Range<b,e>(*this);
       }
 
+      //! Assign a character string to the bitfield, e.g. bitset<3> mybitset = "101";
+      template<std::size_t N>
+        void operator=(char const (& x) [N] ) 
+        {
+          range<0,bits-1>() = x;
+        }
+
+      //! Assign an integer value to the range, e.g. mybitset.range<0,7>() = 0xFA;
+      template<class T>
+        void operator=(T v)
+        {
+          range<0,bits-1>() = v;
+        }
+
+
     //! Convert the bitfield to a string for printing
     std::string to_string()
     {
@@ -112,7 +127,7 @@ class bitfield
     }
 
     //! Convert the bitfield to a number
-    typename uint_x_t<bits>::type to_num()
+    typename uintx_t<bits>::type to_num()
     {
       return this->range<0,bits-1>().to_num();
     }

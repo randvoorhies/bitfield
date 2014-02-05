@@ -3,7 +3,11 @@
 
 int main()
 {
-  bitfield<8> b;
+  bitfield<16> b;
+
+  b = 0xffff;
+
+  std::cout << "initial bitfield: " << b.to_string() << std::endl;
 
   b.range<0,3>() = "0101";
   b.range<4,7>() = 0x0f;
@@ -14,7 +18,7 @@ int main()
 
   std::cout << "bitfields can be reversed too: " << b.reversed().to_string() << " = " << size_t(b.reversed().to_num()) << std::endl;
 
-  std::cout << "ranges can be converted to strings or integers: " << b.range<0,3>().to_string() << " = " << b.range<0,3>().to_num() << std::endl;
+  std::cout << "ranges can be converted to strings or integers: " << b.range<0,3>().to_string() << " = " << (int)b.range<0,3>().to_num() << std::endl;
 
   // b.range<0,8>();          <- Compile time error! Be sure not to overstep your bitfields! Range values are _inclusive_.
   // b.range<0,1>() = "010";  <- Compile time error! This range can only be assigned two bits.
