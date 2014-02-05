@@ -8,3 +8,4 @@
     
     std::cout << "bitfield: " << b.to_string() << " = " << b.to_num() << std::endl;
 
+See test-bitfield.cpp for more examples
