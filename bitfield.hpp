@@ -90,12 +90,14 @@ class bitfield
         }
 
         //! Reverse the bitfield in place
+        /*! This will actually reverse the bits in the original bitfield*/
         void reverse()
         {
-          reversed_ = !reversed_;
+          std::reverse(&(*this)[0], &(*this)[n_range_bits-1]);
         }
 
-        //! Reverse the bitfield in place
+        //! Return a "view" of the bitfield range with the bits reversed
+        /*! This is a non-destructive call, and will not actually reverse any bits in the parent bitfield */
         Range<b,e> reversed()
         {
           Range<b,e> other = *this;
@@ -128,19 +130,6 @@ class bitfield
 
     //! Copy constructor
     bitfield(bitfield<n_bits> const & other) : b_(other.b_) { }
-
-    ////! Construct from range
-    //template<size_t o, size_t b, size_t e>
-    //bitfield(typename bitfield<o>::template Range<b,e> other)
-    //{
-    //  std::cout << "construct from range" << std::endl;
-    //}
-    
-    template<size_t o, size_t b, size_t e>
-    void doit(typename bitfield<o>::template Range<b,e> other)
-    {
-      std::cout << other.reversed_ << std::endl;
-    }
 
     //! Access a range of the bitfield
     template<size_t b, size_t e>
