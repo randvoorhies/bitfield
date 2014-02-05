@@ -105,14 +105,14 @@ class bitfield
         return Range<b,e>(*this);
       }
 
-      //! Assign a character string to the bitfield, e.g. bitset<3> mybitset = "101";
+      //! Assign a character string to the bitfield, e.g. bitset<3> mybitset; mybitset = "101";
       template<std::size_t N>
         void operator=(char const (& x) [N] ) 
         {
           range<0,bits-1>() = x;
         }
 
-      //! Assign an integer value to the range, e.g. mybitset.range<0,7>() = 0xFA;
+      //! Assign an integer value to the bitfield, e.g. bitset<8> mybitset; mybitset = 0xFA;
       template<class T>
         void operator=(T v)
         {

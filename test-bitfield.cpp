@@ -3,7 +3,7 @@
 
 int main()
 {
-  bitfield<16> b;
+  bitfield<16> b = 0;
 
   b = 0xffff;
 
