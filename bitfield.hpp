@@ -109,7 +109,6 @@ class bitfield
         bool reversed_ = false;
       };
 
-
     //! The native storage type
     typedef std::array<bool, n_bits> storage_t;
 
