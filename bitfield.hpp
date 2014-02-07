@@ -159,7 +159,14 @@ namespace bitfield_private
       //! The type of the parent (either const or not)
       typedef typename parent_wrapper<bitfield<parent_bits>, is_const>::type parent_type; 
 
+      //! Construct from a parent
       range(parent_type parent) : parent_(parent) {}
+
+      //! Copy constructor from 
+      template<size_t other_parent_bits, size_t other_b, size_t other_e>
+        range(range<other_parent_bits, other_b, other_e, true> const & other) :
+          parent_(other.parent), reversed_(other.reversed_)
+        { }
 
       //! Assign a character string to the range, e.g. mybitset.range<2,4>() = "101";
       template<std::size_t N, bool is_const_dummy = is_const>
@@ -255,15 +262,14 @@ namespace bitfield_private
 
       //! Return a "view" of the bitfield range with the bits reversed
       /*! This is a non-destructive call, and will not actually reverse any bits in the parent bitfield */
-      range<parent_bits,b,e,true> reversed()
+      range<parent_bits,b,e,is_const> reversed()
       {
-        range<parent_bits,b,e,true> other = *this;
+        range<parent_bits,b,e,is_const> other = *this;
         other.reversed_ = !reversed_;
         return other;
       }
 
       parent_type parent_;
-      //bitfield<parent_bits> & parent_;
       bool reversed_ = false;
     };
 }
